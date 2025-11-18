@@ -12,20 +12,16 @@ dist
 dist-ssr
 *.local
 
-# Environment & secrets
 .env
 .env.*
 server/.env
 server/.env.*
 
-# Allow example env files to be tracked
 !.env.example
 !server/.env.example
 
-# Runtime payment tracking store (exclude persisted refund/charge data)
 server/src/data/
 
-# Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea

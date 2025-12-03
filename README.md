@@ -2,126 +2,81 @@
 
 Full‑stack auction platform (React + Vite frontend, Express backend) with real Omise test‑mode card payments, wallet auto‑credit, and refund‑based withdrawals (no growing local JSON store).
 
-### ✨ Features
-- Live auction listing & detail pages
-- Bidding with balance validation
-- Wallet top‑up via Omise (single‑use token + idempotent charge)
-- Automatic wallet credit after successful charge (polling + duplicate recovery)
-- Withdraw = Omise refund (partial, LIFO across prior charges)
-- Duplicate click / refresh safe (re-attaches to existing charge)
-- Secure separation: secrets only in `server/.env`
+ # AuctionProject
 
-### 🧱 Stack
-| Layer | Tech |
-|-------|------|
-| Frontend | React 19, Vite, React Router |
-| Backend | Node.js, Express |
-| Payments | Omise (client token + server charge) |
+ Full‑stack auction platform (React + Vite frontend, Express backend) used in the course demo.
 
----
-## 🗂 Architecture Overview
-```
-Client (React) ── Omise.js → createToken(card)
-   │ POST /api/payments/create (includes Idempotency-Key)
-   │   → Omise charge (capture)
-   │ GET /api/payments/:id (poll until terminal)
-   │ success → credit wallet (topUp)
-   │ POST /api/payments/withdraw → server lists charges → partial refunds
-```
-No local payment file. Refund calculations come from Omise `charges.list` filtered by `metadata.uid`.
+ This README explains how to run the project locally with a single command (`npm run dev`) that starts both frontend and backend in development mode.
 
----
-## ⚙️ Setup
-### 1. Backend
-```bash
-cd server
-cp .env.example .env   # fill sk_test_... etc.
-npm install
-npm run dev            # http://localhost:3001
-```
-`.env` keys (example):
-```
-OMISE_SECRET_KEY=sk_test_xxx
-ALLOWED_ORIGIN=http://localhost:5173
-```
+ **Quick summary**
+ - Frontend: React + Vite (default dev port: `5173`)
+ - Backend: Express server in `server/` (default port: `3001`)
+ - Unified dev command: run `npm install` then `npm run dev` at project root
 
-### 2. Frontend
-```bash
-cp .env.example .env   # at project root
-npm install
-npm run dev            # http://localhost:5173
-```
-Frontend `.env` keys (public):
-```
-VITE_OMISE_PUBLIC_KEY=pk_test_xxx
-VITE_API_BASE_URL=http://localhost:3001
-```
+ ---
+ ## Prerequisites
+ - Node.js (v18+ recommended)
+ - npm (v9+ recommended)
 
----
-## 🔑 Key Server Endpoints
-| Method | Path | Purpose |
-|--------|------|---------|
-| POST | /api/payments/create | Create card charge (idempotent) |
-| GET | /api/payments/:id | Poll charge status |
-| GET | /api/payments/latest?uid=&amount= | Recover existing charge after duplicate token |
-| POST | /api/payments/withdraw | Issue partial refunds (LIFO) to card |
-| GET | /api/omise/whoami | Diagnose Omise key/mode |
-| GET | /api/health | Basic health info |
+ ---
+ ## Secure env setup (required before running)
+ 1. Copy root `.env.example` to `.env` and fill any necessary client-side values (public keys). This file is used by the frontend for Vite envs.
+ 2. Copy `server/.env.example` to `server/.env` and set server secrets (example: `OMISE_SECRET_KEY`).
 
----
-## 💳 Payment & Refund Flow
-1. User enters card → Omise token (single use)
-2. Client posts token + amount → `/api/payments/create`
-3. Server creates charge with Idempotency-Key (token-based)
-4. Client polls status; on `successful` auto‑credits wallet
-5. Withdraw: client posts amount → server lists last N charges (metadata.uid) and creates partial refunds until amount covered
-6. No local persistence needed; Omise = source of truth
+ Important: do NOT commit `.env` or `server/.env` to source control. The repository includes `.env.example` files for reference only.
 
-Duplicate safety: If token reused (double click / refresh), server returns the existing charge (or 409 recoverable); client reattaches and continues.
+ ---
+ ## Install & run (one command)
+ From project root:
 
----
-## 🔐 Security Notes
-- Secrets never enter the frontend bundle (only `VITE_*` vars are exposed)
-- `.gitignore` excludes `.env`, `server/.env`, `server/src/data/`
-- Rotate any leaked key immediately and rewrite Git history if committed
-- For production: add Omise webhook (verify signature) → credit wallet server‑side (removes reliance on client poll)
+ ```powershell
+ npm install
+ npm run dev
+ ```
 
----
-## 🚀 Quick Usage
-1. Top‑up on Payment page (test card: 4242 4242 4242 4242 / 12/29 / 123)
-2. Place bids (must exceed current highest + within Available balance)
-3. At auction end highest bidder pays; withdraw later if needed via Refund
+ Notes:
+ - The root `postinstall` runs `npm install` inside `server/` automatically.
+ - `npm run dev` runs the frontend (`vite`) and backend (`server`) in parallel using `concurrently`.
 
-Full rules in `src/pages/HowTo.jsx` (Thai)
+ If you prefer to run parts individually:
 
----
-## ❓ FAQ (Short)
-**ยอดหายหลังตัดบัตร?** Refresh Payment page; duplicate recovery will credit automatically.
-**คลิก Pay ซ้ำ?** Idempotency + recovery prevents double charge.
-**ถอนเงินมาจากไหน?** Partial refunds of historical successful charges (latest first).
+ ```powershell
+ # frontend only
+ npm run dev:client
 
----
-## ✅ Pre‑GitHub Checklist
-- [ ] Removed real keys from any commit history
-- [ ] `.env` / `server/.env` present locally only
-- [ ] Built frontend (`npm run build`) – confirm no `sk_test_` in `dist/`
-- [ ] Tested duplicate payment recovery
+ # backend only (from project root)
+ npm run dev:server
+ # or inside server/
+ # cd server; npm run dev
+ ```
 
----
-# (Original Vite README follows)
-# React + Vite
+ ---
+ ## How it works (short)
+ - Client creates Omise tokens (client-side public key) and posts them to the backend for charging.
+ - Backend (`server/src/index.js`) performs idempotent charges and provides endpoints for polling charge status, creating promptpay/offsite sources, and issuing refunds for withdrawals.
+ - Bids, auctions and users are stored in Firebase Realtime Database (client reads/writes directly for auction features).
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ ### Ports & URLs
+ - Frontend: `http://localhost:5173`
+ - Backend API: `http://localhost:3001` (default; change via `server/.env`)
 
-Currently, two official plugins are available:
+ ---
+ ## Local testing tips
+ - Use test cards for Omise (e.g. `4242 4242 4242 4242`) and ensure `server/.env` is configured with a test secret key.
+ - If you do not provide `OMISE_SECRET_KEY`, many payment endpoints will return an informative error; the rest of the app (auctions/bids) will still work locally against Firebase.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+ ---
+ ## Security notes for the demo
+ - Keep real payment keys out of commits. Use `.env.example` for documentation.
+ - For production, add server‑side webhook verification and consider moving wallet crediting logic server‑side (webhook + verified events) instead of only relying on client polling.
 
-## React Compiler
+ ---
+ ## Useful commands
+ - `npm install` — Install all deps (root installs server deps automatically)
+ - `npm run dev` — Start frontend + backend concurrently
+ - `npm run dev:client` — Start only frontend
+ - `npm run dev:server` — Start only backend
+ - `npm run build` — Build frontend for production
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+ ---
+ If you want, I can also add a short `demo.md` with example env values and screenshots for the professor.

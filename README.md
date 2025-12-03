@@ -6,7 +6,60 @@ Full‑stack auction platform (React + Vite frontend, Express backend) with real
 
  Full‑stack auction platform (React + Vite frontend, Express backend) used in the course demo.
 
- This README explains how to run the project locally with a single command (`npm run dev`) that starts both frontend and backend in development mode.
+# AuctionProject
+
+A compact full‑stack auction demo used for course presentation.
+
+This repository contains a React + Vite frontend and an Express backend (in `server/`). The app demonstrates auction listings, bidding (connected to Firebase Realtime Database), and payment flows integrated with Omise (test mode).
+
+This README contains concise, professor-friendly instructions to run the project locally and securely.
+
+---
+
+## Quick facts
+- Frontend: React + Vite (dev port: `5173`)
+- Backend: Express (server folder, default port: `3001`)
+- Realtime data: Firebase Realtime Database (client connects directly)
+- Payments: Omise (server holds secret key in `server/.env`)
+
+---
+
+## Security note (important)
+- Never commit secret keys. Use the provided `.env.example` files and copy them to `.env` (root) and `server/.env` locally.
+- Confirm `.env` and `server/.env` are listed in `.gitignore` before publishing.
+
+---
+
+## Minimal setup (run with one command)
+1. Copy env examples and fill values locally:
+
+```powershell
+cp .env.example .env
+cp server/.env.example server/.env
+# Edit files to add any required values (e.g., VITE_... for frontend, OMISE_SECRET_KEY for server)
+```
+
+2. Install and start both frontend and backend from project root:
+
+```powershell
+npm install
+npm run dev
+```
+
+- `npm install` installs root deps and (via `postinstall`) installs server deps.
+- `npm run dev` runs frontend and backend concurrently (`vite` + `server`), serving the app at `http://localhost:5173` and backend at `http://localhost:3001`.
+
+If you prefer to run parts separately:
+
+```powershell
+# frontend only
+npm run dev:client
+
+# backend only (from project root)
+npm run dev:server
+# or
+cd server; npm run dev
+```
 
  **Quick summary**
  - Frontend: React + Vite (default dev port: `5173`)
@@ -14,46 +67,60 @@ Full‑stack auction platform (React + Vite frontend, Express backend) with real
  - Unified dev command: run `npm install` then `npm run dev` at project root
 
  ---
- ## Prerequisites
- - Node.js (v18+ recommended)
- - npm (v9+ recommended)
+# AuctionProject
 
- ---
- ## Secure env setup (required before running)
- 1. Copy root `.env.example` to `.env` and fill any necessary client-side values (public keys). This file is used by the frontend for Vite envs.
- 2. Copy `server/.env.example` to `server/.env` and set server secrets (example: `OMISE_SECRET_KEY`).
+A compact full‑stack auction demo used for course presentation.
 
- Important: do NOT commit `.env` or `server/.env` to source control. The repository includes `.env.example` files for reference only.
+This repository contains a React + Vite frontend and an Express backend (in `server/`). The app demonstrates auction listings, bidding (connected to Firebase Realtime Database), and payment flows integrated with Omise (test mode).
 
- ---
- ## Install & run (one command)
- From project root:
+This README contains concise, professor-friendly instructions to run the project locally and securely.
 
- ```powershell
- npm install
- npm run dev
- ```
+---
 
- Notes:
- - The root `postinstall` runs `npm install` inside `server/` automatically.
- - `npm run dev` runs the frontend (`vite`) and backend (`server`) in parallel using `concurrently`.
+## Quick facts
+- Frontend: React + Vite (dev port: `5173`)
+- Backend: Express (server folder, default port: `3001`)
+- Realtime data: Firebase Realtime Database (client connects directly)
+- Payments: Omise (server holds secret key in `server/.env`)
 
- If you prefer to run parts individually:
+---
 
- ```powershell
- # frontend only
- npm run dev:client
+## Security note (important)
+- Never commit secret keys. Use the provided `.env.example` files and copy them to `.env` (root) and `server/.env` locally.
+- Confirm `.env` and `server/.env` are listed in `.gitignore` before publishing.
 
- # backend only (from project root)
- npm run dev:server
- # or inside server/
- # cd server; npm run dev
- ```
+---
 
- ---
- ## How it works (short)
- - Client creates Omise tokens (client-side public key) and posts them to the backend for charging.
+## Minimal setup (run with one command)
+1. Copy env examples and fill values locally:
+
+```powershell
+cp .env.example .env
+cp server/.env.example server/.env
+# Edit files to add any required values (e.g., VITE_... for frontend, OMISE_SECRET_KEY for server)
+```
+
+2. Install and start both frontend and backend from project root:
+
+```powershell
+npm install
+npm run dev
+```
+
+- `npm install` installs root deps and (via `postinstall`) installs server deps.
+- `npm run dev` runs frontend and backend concurrently (`vite` + `server`), serving the app at `http://localhost:5173` and backend at `http://localhost:3001`.
+
+If you prefer to run parts separately:
+
+```powershell
+# frontend only
+npm run dev:client
+
+# backend only (from project root)
  - Backend (`server/src/index.js`) performs idempotent charges and provides endpoints for polling charge status, creating promptpay/offsite sources, and issuing refunds for withdrawals.
+# or
+cd server; npm run dev
+```
  - Bids, auctions and users are stored in Firebase Realtime Database (client reads/writes directly for auction features).
 
  ### Ports & URLs
@@ -79,4 +146,4 @@ Full‑stack auction platform (React + Vite frontend, Express backend) with real
  - `npm run build` — Build frontend for production
 
  ---
- If you want, I can also add a short `demo.md` with example env values and screenshots for the professor.
+

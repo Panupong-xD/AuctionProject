@@ -17,7 +17,7 @@ export default function MobileSidebar({ open, onClose, currentUser }) {
       {open && <div className="sidebar-overlay" onClick={onClose} />}
       <aside className={`sidebar ${open ? 'open' : ''}`} aria-hidden={!open}>
         <div className="sidebar-header">
-          <div className="brand-mini">Pramoon</div>
+          <div className="brand-mini">PSAuction</div>
           <button className="btn ghost small" onClick={onClose} aria-label="Close menu">Close</button>
         </div>
         <nav className="sidebar-nav">

@@ -2,10 +2,6 @@
 
 Full‑stack auction platform (React + Vite frontend, Express backend) with real Omise test‑mode card payments, wallet auto‑credit, and refund‑based withdrawals (no growing local JSON store).
 
- # AuctionProject
-
- Full‑stack auction platform (React + Vite frontend, Express backend) used in the course demo.
-
 # AuctionProject
 
 A compact full‑stack auction demo used for course presentation.
